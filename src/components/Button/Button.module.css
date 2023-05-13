@@ -1,0 +1,20 @@
+.button {
+	width: fit-content;
+	margin: 5px;
+	padding: 5px 15px !important;
+	color: black;
+	background: #f3f3f3;
+	border: 2px solid black;
+	cursor: pointer;
+
+	font-family: 'Montserrat-Medium';
+	font-size: 0.8rem;
+	text-transform: uppercase;
+
+	transition: box-shadow 0.3s ease-in;
+}
+
+.button:hover {
+	box-shadow: var(--hover-shadow);
+	transition: box-shadow 0.3s ease-in;
+}

@@ -1,0 +1,42 @@
+.header {
+	display: flex;
+	height: 50px;
+	width: 100%;
+
+	background-color: var(--navWhite);
+	border-bottom: 1px solid rgb(216, 216, 216);
+}
+
+.header svg {
+	display: flex;
+	margin: auto 20px;
+
+	width: 35px;
+	height: 35px;
+}
+
+.headerNav {
+	display: flex;
+	align-items: center;
+	padding: 15px;
+}
+
+.headerNav > * {
+	margin-right: 25px;
+	text-decoration: none;
+	color: black;
+	font-size: 15px;
+	font-weight: bold;
+
+	border-bottom: 0px solid transparent;
+	transition: all 0.5s ease-out;
+}
+
+.headerNav > *:last-child {
+	margin-right: 0px;
+}
+
+.headerNav > *:hover {
+	border-bottom: 1px solid black;
+	transition: all 0.5s ease-out;
+}
