@@ -6,21 +6,18 @@ import Player from 'resources/models/Player';
 
 export default class chessStore {
 	private _gameTime: number | null;
+	private _currentPlayer: Player | null;
 
 	private _isGameStarted: boolean;
 	private _isGameEnded: boolean;
-	private _isTimeEnded: boolean;
-
-	private _currentPlayer: Player | null;
 
 	constructor() {
 		this._gameTime = 600;
+		this._currentPlayer = null;
 
 		this._isGameStarted = false;
 		this._isGameEnded = false;
-		this._isTimeEnded = false;
 
-		this._currentPlayer = null;
 		makeAutoObservable(this);
 	}
 
@@ -31,17 +28,11 @@ export default class chessStore {
 
 	setGameEnded() {
 		this._isGameEnded = true;
-		this._isGameStarted = false;
-	}
-
-	setTimeEnded() {
-		this._isTimeEnded = true;
-		this._isGameStarted = false;
 	}
 
 	restartGame() {
+		this._isGameStarted = false;
 		this._isGameEnded = false;
-		this._isTimeEnded = false;
 	}
 
 	startGame() {
@@ -59,10 +50,6 @@ export default class chessStore {
 
 	get gameEndStatus(): boolean {
 		return this._isGameEnded;
-	}
-
-	get timeEndStatus(): boolean {
-		return this._isTimeEnded;
 	}
 
 	get gameTime(): number | null {

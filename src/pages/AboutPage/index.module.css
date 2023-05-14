@@ -1,0 +1,16 @@
+.aboutApp {
+	text-align: justify;
+	font-size: 1rem;
+
+	padding: 10px;
+}
+
+.aboutApp h1 {
+	margin: 10px;
+	text-align: center;
+	font-size: 1.2rem;
+}
+
+.githubLink {
+	margin-top: 10px;
+}

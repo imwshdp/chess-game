@@ -1,6 +1,9 @@
 import React from 'react';
 import Cell from 'resources/models/Cell';
 
+import css from './index.module.css';
+import Colors from 'resources/models/Colors';
+
 interface CellProps {
 	cell: Cell;
 	selected: boolean;
@@ -10,7 +13,11 @@ interface CellProps {
 const ChessCell: React.FC<CellProps> = ({ cell, selected, click }) => {
 	return (
 		<div
-			className={['cell', cell.color, selected ? 'selected' : ''].join(' ')}
+			className={[
+				css.cell,
+				cell.color === Colors.WHITE ? css.white : css.black,
+				selected ? css.selected : ''
+			].join(' ')}
 			onClick={() => click(cell)}
 			// green background if cell contains figure and is available to move
 			style={{
@@ -18,7 +25,7 @@ const ChessCell: React.FC<CellProps> = ({ cell, selected, click }) => {
 				boxShadow: cell.figure?.checked === true ? 'inset 0 0 25px red' : '',
 			}}>
 			{/* green marks of availability to move */}
-			{cell.available && !cell.figure && <div className='available' />}
+			{cell.available && !cell.figure && <div className={css.available} />}
 
 			{/* figures render */}
 			{cell.figure?.logo && <img src={cell.figure.logo} alt='' />}

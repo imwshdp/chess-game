@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, LegacyRef } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from 'store';
 
@@ -8,20 +8,21 @@ import Colors from 'resources/models/Colors';
 import Board from 'resources/models/Board';
 import Cell from 'resources/models/Cell';
 
+import css from './index.module.css';
+import StatusBar from 'components/StatusBar';
+
 interface BoardProps {
 	board: Board;
 	setBoard: (board: Board) => void;
 	swapPlayer: () => void;
+	currentPlayerBadge: React.RefObject<HTMLSpanElement> | null;
 }
 
-const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer }) => {
+const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer, currentPlayerBadge }) => {
 	const store = useStore();
-	const currentPlayer = store.currentPlayer;
-	const isGameEnded = store.gameEndStatus;
-	const isTimeEnded = store.timeEndStatus;
-	const isGameStarted = store.gameStartStatus;
-
-	console.log('store :>> ', store);
+	const currentPlayer = store.currentPlayer,
+		isGameEnded = store.gameEndStatus,
+		isGameStarted = store.gameStartStatus;
 
 	// selected cell state
 	const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
@@ -36,43 +37,32 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 
 	// GAME ENDING
 	useEffect(() => {
-		if (isGameEnded || isTimeEnded) {
+		if (isGameEnded) {
 			setSelectedCell(null);
 			blockCells();
-			showWinner();
 		}
-	}, [isGameEnded, isTimeEnded]);
-
-	// TODO modal
-	const showWinner = () => {
-		const colorOfWinner = currentPlayer?.color === Colors.WHITE ? 'чёрным' : 'белым';
-		setTimeout(() => window.alert(`Победа за ${colorOfWinner} игроком!`));
-	};
+	}, [isGameEnded]);
 
 	const handleClick = (cell: Cell) => {
 		// game start by first click (when game was restarted, but not started yet)
-		if (!isGameStarted && !isGameEnded && !isGameEnded && cell.figure?.color === Colors.WHITE) {
+		if (!isGameStarted && !isGameEnded && cell.figure?.color === Colors.WHITE) {
 			store.startGame();
 		}
 
 		// MOVING TO CELL
 		if (selectedCell && selectedCell !== cell && cell.available) {
 			// check state rewriting for kings to false
-			if (!!board.whiteKing && board.whiteKing.figure) {
-				board.whiteKing.figure.checked = false;
-			}
-			if (!!board.blackKing && board.blackKing.figure) {
-				board.blackKing.figure.checked = false;
-			}
+			if (!!board.whiteKing && board.whiteKing.figure) board.whiteKing.figure.checked = false;
+			if (!!board.blackKing && board.blackKing.figure) board.blackKing.figure.checked = false;
+
 			if (selectedCell.figure?.name === FigureName.KING) {
 				selectedCell.figure.color === Colors.WHITE ? (board.whiteKing = cell) : (board.blackKing = cell);
 			}
+
 			selectedCell.moveFigure(cell);
 			setSelectedCell(null);
-
 			checkmateCheck();
-
-			swapPlayer(); // swap player
+			swapPlayer();
 		} else {
 			// PICKING CELL
 			if (cell.blocked) return;
@@ -106,8 +96,9 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 
 	return (
 		<>
-			<h3>Сейчас ходит {currentPlayer?.color === Colors.WHITE ? 'белый' : 'чёрный'} игрок</h3>
-			<div className='board'>
+			<StatusBar currentPlayerBadge={currentPlayerBadge} />
+
+			<div className={css.board}>
 				{board.cells.map((row, index) => (
 					<React.Fragment key={index}>
 						{row.map(cell => (

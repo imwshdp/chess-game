@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from 'store';
 
@@ -10,6 +10,7 @@ import Board from 'resources/models/Board';
 import Timer from 'components/Timer';
 import ChessBoard from 'components/ChessBoard';
 import Button from 'components/Button/Button';
+import Modal from 'components/Modal';
 
 const ChessPage: React.FC = observer(() => {
 	// store
@@ -21,6 +22,8 @@ const ChessPage: React.FC = observer(() => {
 	// players states
 	const [whitePlayer, setWhitePlayer] = useState(new Player(Colors.WHITE));
 	const [blackPlayer, setBlackPlayer] = useState(new Player(Colors.BLACK));
+
+	const currentPlayerBadge = useRef<HTMLSpanElement | null>(null);
 
 	useEffect(() => {
 		restart();
@@ -34,6 +37,7 @@ const ChessPage: React.FC = observer(() => {
 
 		store.setCurrentPlayer(whitePlayer);
 		store.restartGame();
+		currentPlayerBadge?.current?.classList.remove('flipped');
 	}
 
 	function swapPlayer() {
@@ -71,7 +75,7 @@ const ChessPage: React.FC = observer(() => {
 				</form>
 			</details>
 
-			<ChessBoard board={board} setBoard={setBoard} swapPlayer={swapPlayer} />
+			<ChessBoard board={board} setBoard={setBoard} swapPlayer={swapPlayer} currentPlayerBadge={currentPlayerBadge} />
 			<Timer restart={restart} />
 
 			<div>
@@ -81,6 +85,8 @@ const ChessPage: React.FC = observer(() => {
 					<BoxContainer title={'Белые'} figures={board.lostWhiteFigures} />
 				</div>
 			</div>
+
+			<Modal />
 		</main>
 	);
 });

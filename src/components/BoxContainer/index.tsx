@@ -1,6 +1,8 @@
 import React from 'react';
 import { Figure } from 'resources/models/figures/Figure';
 
+import css from './index.module.css';
+
 interface LostFiguresProps {
 	title: string;
 	figures: Figure[];
@@ -8,7 +10,7 @@ interface LostFiguresProps {
 
 const BoxContainer: React.FC<LostFiguresProps> = ({ title, figures }) => {
 	return (
-		<div className='lost'>
+		<div className={css.lost}>
 			<h3>{title}</h3>
 			{figures.map(figure => (
 				<div key={figure.id}>

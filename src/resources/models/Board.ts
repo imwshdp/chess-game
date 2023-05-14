@@ -103,6 +103,10 @@ class Board {
 		let isGameEnded = true;
 		const cellsToEscape: Cell[] = []; // array with all cells to escape for king
 
+		if (this.lostBlackFigures.length === 15 || this.lostWhiteFigures.length === 15) {
+			return isGameEnded;
+		}
+
 		for (let i = -1; i < 2; i++) {
 			for (let j = -1; j < 2; j++) {
 				let x = king.x + i;
@@ -217,6 +221,7 @@ class Board {
 	// adding figures methods
 	private addPawns() {
 		for (let i = 0; i < 8; i++) {
+			if (i == 4) continue;
 			new Pawn(Colors.BLACK, this.getCell(i, 1));
 			new Pawn(Colors.WHITE, this.getCell(i, 6));
 		}
@@ -232,13 +237,15 @@ class Board {
 	}
 
 	private addQueens() {
-		new Queen(Colors.BLACK, this.getCell(3, 0));
-		new Queen(Colors.WHITE, this.getCell(3, 7));
+		// new Queen(Colors.BLACK, this.getCell(3, 0));
+		// new Queen(Colors.WHITE, this.getCell(3, 7));
+
+		new Queen(Colors.WHITE, this.getCell(4, 5));
 	}
 
 	private addBishops() {
 		new Bishop(Colors.BLACK, this.getCell(2, 0));
-		new Bishop(Colors.BLACK, this.getCell(5, 0));
+		// new Bishop(Colors.BLACK, this.getCell(5, 0));
 		new Bishop(Colors.WHITE, this.getCell(2, 7));
 		new Bishop(Colors.WHITE, this.getCell(5, 7));
 	}
@@ -255,6 +262,8 @@ class Board {
 		new Rook(Colors.BLACK, this.getCell(7, 0));
 		new Rook(Colors.WHITE, this.getCell(0, 7));
 		new Rook(Colors.WHITE, this.getCell(7, 7));
+
+		new Rook(Colors.WHITE, this.getCell(4, 4));
 	}
 
 	public addFigures() {

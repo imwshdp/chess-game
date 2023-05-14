@@ -1,0 +1,33 @@
+.cell {
+	width: 64px;
+	height: 64px;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.cell img {
+	width: 48px;
+	height: 48px;
+	position: relative;
+}
+
+.black {
+	background-color: rgb(79, 86, 88);
+}
+
+.white {
+	background-color: rgb(247, 207, 127);
+}
+
+.selected {
+	background-color: rgb(112, 54, 54);
+}
+
+.available {
+	height: 12px;
+	width: 12px;
+	border-radius: 50%;
+	background-color: rgb(82, 177, 82);
+}

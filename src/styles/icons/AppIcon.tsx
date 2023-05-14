@@ -1,5 +1,5 @@
 const AppIcon = () => (
-	<svg width='current' height='current' viewBox='0 0 400 400' id='Layer_1' xmlns='http://www.w3.org/2000/svg'>
+	<svg width='100%' height='100%' viewBox='0 0 400 400' id='Layer_1' xmlns='http://www.w3.org/2000/svg'>
 		<path fill='#007acc' d='M0 200V0h400v400H0' />
 		<path
 			fill='#fff'

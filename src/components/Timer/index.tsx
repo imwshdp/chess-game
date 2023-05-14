@@ -5,6 +5,8 @@ import { useStore } from 'store';
 import Colors from 'resources/models/Colors';
 import Button from 'components/Button/Button';
 
+import css from './index.module.css';
+
 interface TimerProps {
 	restart: () => void;
 }
@@ -14,6 +16,7 @@ const Timer: React.FC<TimerProps> = observer(({ restart }) => {
 	const gameTime = store.gameTime;
 	const currentPlayer = store.currentPlayer;
 	const isGameStarted = store.gameStartStatus;
+	const isGameEnded = store.gameEndStatus;
 
 	const [blackTime, setBlackTime] = useState<number | null>(gameTime);
 	const [whiteTime, setWhiteTime] = useState<number | null>(gameTime);
@@ -23,25 +26,24 @@ const Timer: React.FC<TimerProps> = observer(({ restart }) => {
 	// TIME CHANGING
 	useEffect(() => {
 		if (isGameStarted) return;
-
 		setBlackTime(gameTime);
 		setWhiteTime(gameTime);
 	}, [gameTime]);
 
-	// SWAP OR STOP TIMER
+	// SWAP TIMER
 	useEffect(() => {
-		if (isGameStarted) {
-			if (gameTime) startTimer(); // start new timer if it is active
-		} else {
-			if (timer.current) clearInterval(timer.current); // stop timer
-		}
-	}, [currentPlayer, isGameStarted]);
+		if (gameTime) startTimer();
+	}, [currentPlayer]);
+
+	// STOP TIMER AFTER END OF GAME
+	useEffect(() => {
+		if (timer.current) clearInterval(timer.current);
+	}, [isGameEnded]);
 
 	// TIME OVER
 	useEffect(() => {
 		if (whiteTime === 0 || blackTime === 0) {
-			store.setTimeEnded();
-			// store.setGameEnded();
+			store.setGameEnded();
 		}
 	}, [whiteTime, blackTime]);
 
@@ -68,7 +70,7 @@ const Timer: React.FC<TimerProps> = observer(({ restart }) => {
 	};
 
 	return (
-		<section className='timer'>
+		<section className={css.timer}>
 			<Button onClick={handleRestart}>Новая игра</Button>
 			{gameTime && (
 				<>
