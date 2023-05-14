@@ -14,7 +14,7 @@
 
 html,
 body {
-	min-width: calc(64px * 8 + 30px);
+	min-width: calc(64px * 8 + 40px);
 
 	background-color: var(--white);
 	font-family: 'Montserrat-Light';

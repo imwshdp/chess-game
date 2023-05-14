@@ -10,6 +10,7 @@ const App: React.FC = () => {
 	return (
 		<Routes>
 			<Route path='/' element={<Layout />}>
+				<Route index element={<ChessPage />} />
 				<Route path='/chess' element={<ChessPage />} />
 				<Route path='/about' element={<AboutPage />} />
 			</Route>
