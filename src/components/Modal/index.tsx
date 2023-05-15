@@ -8,25 +8,36 @@ import css from './index.module.css';
 const Modal: React.FC = observer(() => {
 	const store = useStore();
 	const currentPlayer = store.currentPlayer,
-		isGameEnded = store.gameEndStatus;
+		isGameEnded = store.gameEndStatus,
+		isGameStalemated = store.gameStalemateStatus;
 
-	// modal visibility state
-	const [visible, setVisible] = useState(false);
-
-	// winner's color
-	const colorOfWinner = currentPlayer?.color === Colors.WHITE ? 'чёрным' : 'белым';
+	const [visible, setVisible] = useState(false); // modal visibility state
+	const [colorOfWinner, setColorOfWinner] = useState<string>(''); // winner's color
 
 	useEffect(() => {
-		if (isGameEnded) {
+		if (isGameEnded || isGameStalemated) {
+			setColorOfWinner(currentPlayer?.color === Colors.WHITE ? 'чёрным' : 'белым');
 			setVisible(true);
 			setTimeout(() => setVisible(false), 3000);
 		}
-	}, [isGameEnded]);
+	}, [isGameEnded, isGameStalemated]);
 
 	return (
 		<div className={visible === true ? css.ModalActive : css.Modal}>
 			<div className={css.ModalContent}>
-				Победа за <b>{`${colorOfWinner}`}</b> игроком!
+				{isGameStalemated && (
+					<span>
+						Игра окончилась <b>ничьей</b>!
+					</span>
+				)}
+
+				{isGameEnded && !isGameStalemated && (
+					<span>
+						Победа за <b>{`${colorOfWinner}`}</b> игроком!
+					</span>
+				)}
+
+				{!isGameEnded && !isGameStalemated && <span>Новая игра уже началась!</span>}
 			</div>
 		</div>
 	);

@@ -1,7 +1,7 @@
 import { checkingController } from 'resources/helpers/checkingController';
 import Colors from 'resources/models/Colors';
 import Cell from 'resources/models/Cell';
-import { Figure } from './figures/Figure';
+import { Figure, FigureName } from './figures/Figure';
 
 import Knight from 'resources/models/figures/Knight';
 import Bishop from 'resources/models/figures/Bishop';
@@ -9,6 +9,12 @@ import Queen from 'resources/models/figures/Queen';
 import Pawn from 'resources/models/figures/Pawn';
 import King from 'resources/models/figures/King';
 import Rook from 'resources/models/figures/Rook';
+import { stalemateController } from 'resources/helpers/stalemateController';
+
+interface ICastle {
+	withLeftRook: boolean;
+	withRightRook: boolean;
+}
 
 class Board {
 	// cells grid
@@ -21,6 +27,17 @@ class Board {
 	// kings cells
 	whiteKing: Cell | undefined = undefined;
 	blackKing: Cell | undefined = undefined;
+
+	// castles possibilities
+	whiteCastle: ICastle = {
+		withLeftRook: true,
+		withRightRook: true,
+	};
+
+	blackCastle: ICastle = {
+		withLeftRook: true,
+		withRightRook: true,
+	};
 
 	public initCells() {
 		for (let i = 0; i < 8; i++) {
@@ -50,6 +67,9 @@ class Board {
 
 		newBoard.whiteKing = this.whiteKing;
 		newBoard.blackKing = this.blackKing;
+
+		newBoard.whiteCastle = this.whiteCastle;
+		newBoard.blackCastle = this.blackCastle;
 
 		return newBoard;
 	}
@@ -166,6 +186,10 @@ class Board {
 		return false;
 	}
 
+	public isGameStalemated(currentPlayerKing: Cell) {
+		return stalemateController(this, currentPlayerKing);
+	}
+
 	public blockCells(): void {
 		for (let i = 0; i < this.cells.length; i++) {
 			for (let j = 0; j < this.cells[i].length; j++) {
@@ -187,6 +211,72 @@ class Board {
 			for (let j = 0; j < this.cells[i].length; j++) {
 				this.getCell(i, j).available = false;
 			}
+		}
+	}
+
+	public checkPossibilityToCastle(king: Cell) {
+		if (king.figure?.color === Colors.WHITE) {
+			const leftRook = this.getCell(0, 7);
+			const rightRook = this.getCell(7, 7);
+
+			const leftCell = this.getCell(king.x - 1, king.y);
+			const rightCell = this.getCell(king.x + 1, king.y);
+
+			if (this.whiteCastle.withLeftRook && leftCell.available) {
+				leftRook.available = true;
+			}
+
+			if (this.whiteCastle.withRightRook && rightCell.available) {
+				rightRook.available = true;
+			}
+		} else if (king.figure?.color === Colors.BLACK) {
+			const leftRook = this.getCell(0, 0);
+			const rightRook = this.getCell(7, 0);
+
+			const leftCell = this.getCell(king.x - 1, king.y);
+			const rightCell = this.getCell(king.x + 1, king.y);
+
+			if (this.whiteCastle.withLeftRook && leftCell.available) {
+				leftRook.available = true;
+			}
+
+			if (this.whiteCastle.withRightRook && rightCell.available) {
+				rightRook.available = true;
+			}
+		}
+	}
+
+	public castleActivityCheck(from: Cell, to: Cell) {
+		const colorOfMovedCell = to.figure?.color as Colors;
+
+		if (to.figure?.name === FigureName.KING) {
+			this.blockCastlesForColor(colorOfMovedCell);
+		}
+
+		if (to.figure?.name === FigureName.ROOK) {
+			if (colorOfMovedCell === Colors.WHITE) {
+				if (from.x === 0) {
+					this.whiteCastle.withLeftRook = false;
+				} else {
+					this.whiteCastle.withRightRook = false;
+				}
+			} else if (colorOfMovedCell === Colors.BLACK) {
+				if (from.x === 0) {
+					this.blackCastle.withLeftRook = false;
+				} else {
+					this.blackCastle.withRightRook = false;
+				}
+			}
+		}
+	}
+
+	public blockCastlesForColor(color: Colors) {
+		if (color === Colors.WHITE) {
+			this.whiteCastle.withLeftRook = false;
+			this.whiteCastle.withRightRook = false;
+		} else if (color === Colors.BLACK) {
+			this.blackCastle.withLeftRook = false;
+			this.blackCastle.withRightRook = false;
 		}
 	}
 
@@ -212,6 +302,11 @@ class Board {
 				}
 			}
 		}
+
+		// castle highlight
+		if (selectedCell?.figure?.name === FigureName.KING && !selectedCell.figure.checked) {
+			this.checkPossibilityToCastle(selectedCell);
+		}
 	}
 
 	addLostFigure(figure: Figure) {
@@ -230,7 +325,7 @@ class Board {
 		let blackKing = new King(Colors.BLACK, this.getCell(4, 0));
 		let whiteKing = new King(Colors.WHITE, this.getCell(4, 7));
 
-		// kings saving
+		// save positions of kings
 		this.whiteKing = whiteKing.cell;
 		this.blackKing = blackKing.cell;
 	}

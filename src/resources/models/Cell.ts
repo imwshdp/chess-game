@@ -118,6 +118,15 @@ export default class Cell {
 		this.figure.cell = this;
 	}
 
+	forceMove(target: Cell) {
+		if (this.figure) {
+			this.figure.moveFigure(target);
+
+			target.setFigure(this.figure);
+			this.figure = null;
+		}
+	}
+
 	moveFigure(target: Cell) {
 		if (this.figure && this.figure?.canMove(target)) {
 			// moving figure

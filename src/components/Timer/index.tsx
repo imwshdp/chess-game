@@ -13,10 +13,10 @@ interface TimerProps {
 
 const Timer: React.FC<TimerProps> = observer(({ restart }) => {
 	const store = useStore();
-	const gameTime = store.gameTime;
-	const currentPlayer = store.currentPlayer;
-	const isGameStarted = store.gameStartStatus;
-	const isGameEnded = store.gameEndStatus;
+	const gameTime = store.gameTime,
+		currentPlayer = store.currentPlayer,
+		isGameStarted = store.gameStartStatus,
+		isGameEnded = store.gameEndStatus;
 
 	const [blackTime, setBlackTime] = useState<number | null>(gameTime);
 	const [whiteTime, setWhiteTime] = useState<number | null>(gameTime);
@@ -32,8 +32,8 @@ const Timer: React.FC<TimerProps> = observer(({ restart }) => {
 
 	// SWAP TIMER
 	useEffect(() => {
-		if (gameTime) startTimer();
-	}, [currentPlayer]);
+		if (gameTime && isGameStarted) startTimer();
+	}, [currentPlayer, isGameStarted]);
 
 	// STOP TIMER AFTER END OF GAME
 	useEffect(() => {
@@ -43,7 +43,7 @@ const Timer: React.FC<TimerProps> = observer(({ restart }) => {
 	// TIME OVER
 	useEffect(() => {
 		if (whiteTime === 0 || blackTime === 0) {
-			store.setGameEnded();
+			store.setGameEnd();
 		}
 	}, [whiteTime, blackTime]);
 

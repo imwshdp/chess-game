@@ -43,6 +43,13 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 		}
 	}, [isGameEnded]);
 
+	useEffect(() => {
+		if (isGameStarted && stalemateCheck()) {
+			store.setGameStalemate();
+			store.setGameEnd();
+		}
+	}, [currentPlayer]);
+
 	const handleClick = (cell: Cell) => {
 		// game start by first click (when game was restarted, but not started yet)
 		if (!isGameStarted && !isGameEnded && cell.figure?.color === Colors.WHITE) {
@@ -55,13 +62,28 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 			if (!!board.whiteKing && board.whiteKing.figure) board.whiteKing.figure.checked = false;
 			if (!!board.blackKing && board.blackKing.figure) board.blackKing.figure.checked = false;
 
-			if (selectedCell.figure?.name === FigureName.KING) {
-				selectedCell.figure.color === Colors.WHITE ? (board.whiteKing = cell) : (board.blackKing = cell);
+			// MOVES HANDLER
+			if (
+				selectedCell.figure?.name === FigureName.KING &&
+				cell.figure?.name === FigureName.ROOK &&
+				selectedCell.figure.color === cell.figure.color
+			) {
+				// castles
+				handleCastle(selectedCell, cell);
+			} else {
+				if (selectedCell.figure?.name === FigureName.KING) {
+					selectedCell.figure.color === Colors.WHITE ? (board.whiteKing = cell) : (board.blackKing = cell);
+				}
+
+				// common move
+				selectedCell.moveFigure(cell);
+
+				castleActivityCheck(selectedCell, cell);
 			}
 
-			selectedCell.moveFigure(cell);
 			setSelectedCell(null);
 			checkmateCheck();
+
 			swapPlayer();
 		} else {
 			// PICKING CELL
@@ -73,6 +95,35 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 		}
 	};
 
+	const handleCastle = (king: Cell, rook: Cell) => {
+		const color = king.figure?.color as Colors;
+
+		if (rook.x === 0) {
+			// left rook
+			const newKingPosition = board.getCell(king.x - 2, king.y);
+			rook.forceMove(board.getCell(king.x - 1, king.y));
+			king.forceMove(newKingPosition);
+			newKingPosition.figure?.color === Colors.WHITE
+				? (board.whiteKing = newKingPosition)
+				: (board.blackKing = newKingPosition);
+		} else if (rook.x === 7) {
+			// right rook
+			const newKingPosition = board.getCell(king.x + 2, king.y);
+			rook.forceMove(board.getCell(king.x + 1, king.y));
+			king.forceMove(newKingPosition);
+			newKingPosition.figure?.color === Colors.WHITE
+				? (board.whiteKing = newKingPosition)
+				: (board.blackKing = newKingPosition);
+		}
+
+		// lock castles for this color
+		blockCastlesForColor(color);
+	};
+
+	const blockCastlesForColor = (color: Colors) => {
+		board.blockCastlesForColor(color);
+	};
+
 	const highlightCells = (currentPlayerKing: Cell) => {
 		board.highlightCells(selectedCell, currentPlayerKing);
 		updateBoard();
@@ -81,7 +132,19 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 	const checkmateCheck = () => {
 		const isCheckmated = board.checkmateCheck();
 		if (isCheckmated) {
-			store.setGameEnded();
+			store.setGameEnd();
+		}
+	};
+
+	const castleActivityCheck = (from: Cell, to: Cell) => {
+		board.castleActivityCheck(from, to);
+	};
+
+	const stalemateCheck = () => {
+		if (currentPlayer) {
+			return board.isGameStalemated(
+				currentPlayer.color === Colors.WHITE ? (board.whiteKing as Cell) : (board.blackKing as Cell)
+			);
 		}
 	};
 

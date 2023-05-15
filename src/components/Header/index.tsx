@@ -9,7 +9,7 @@ const Header: React.FC = () => {
 			<AppIcon />
 			<nav className={css.headerNav}>
 				<Link to={'/about'}>О приложении</Link>
-				<Link to={'/chess'}>Шахматы</Link>
+				<Link to={'/'}>Шахматы</Link>
 			</nav>
 		</div>
 	);

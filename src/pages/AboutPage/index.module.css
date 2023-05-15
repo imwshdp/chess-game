@@ -11,6 +11,20 @@
 	font-size: 1.2rem;
 }
 
+.aboutApp p {
+	padding-top: 10px;
+}
+
+.aboutApp ul {
+	margin-left: 10px;
+	list-style-type: circle;
+	list-style-position: inside;
+}
+
+.aboutApp li {
+	margin-top: 10px;
+}
+
 .githubLink {
 	margin-top: 10px;
 }

@@ -10,6 +10,7 @@ export default class chessStore {
 
 	private _isGameStarted: boolean;
 	private _isGameEnded: boolean;
+	private _isStalemated: boolean;
 
 	constructor() {
 		this._gameTime = 600;
@@ -17,6 +18,7 @@ export default class chessStore {
 
 		this._isGameStarted = false;
 		this._isGameEnded = false;
+		this._isStalemated = false;
 
 		makeAutoObservable(this);
 	}
@@ -26,13 +28,18 @@ export default class chessStore {
 		this._gameTime = time;
 	}
 
-	setGameEnded() {
+	setGameEnd() {
 		this._isGameEnded = true;
+	}
+
+	setGameStalemate() {
+		this._isStalemated = true;
 	}
 
 	restartGame() {
 		this._isGameStarted = false;
 		this._isGameEnded = false;
+		this._isStalemated = false;
 	}
 
 	startGame() {
@@ -50,6 +57,10 @@ export default class chessStore {
 
 	get gameEndStatus(): boolean {
 		return this._isGameEnded;
+	}
+
+	get gameStalemateStatus(): boolean {
+		return this._isStalemated;
 	}
 
 	get gameTime(): number | null {
