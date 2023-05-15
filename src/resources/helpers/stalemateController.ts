@@ -20,6 +20,9 @@ export const stalemateController = (board: Board, king: Cell): boolean => {
 	// return false if king's check confirmed
 	if (king.figure?.checked) return false;
 
+	// return true if there are only two kings
+	if (board.lostBlackFigures.length === 15 && board.lostWhiteFigures.length === 15) return true;
+
 	const currentColor: Colors = king?.figure?.color as Colors;
 
 	for (let i = 0; i < board.cells.length; i++) {

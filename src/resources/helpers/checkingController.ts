@@ -1,3 +1,4 @@
+import Colors from 'resources/models/Colors';
 import Board from '../../resources/models/Board';
 import Cell from '../../resources/models/Cell';
 import { getDeepCopyBoard } from './copying';
@@ -20,6 +21,27 @@ export const checkingController = (board: Board, selectedCell: Cell, kingCell: C
 		// check danger for king after move
 		if (!newPotentialBoard.isKingInDanger(newPotentialKingCell, cellsOfPotentialBoard)) {
 			return false;
+		}
+	}
+
+	return true;
+};
+
+export const isCellIsSafe = (board: Board, cell: Cell, currentColor: Colors): boolean => {
+	const newPotentialBoard: Board = getDeepCopyBoard(board); // new board
+	const currentCell = newPotentialBoard.getCell(cell.x, cell.y); // selected cell
+
+	for (let i = 0; i < board.cells.length; i++) {
+		for (let j = 0; j < board.cells[i].length; j++) {
+			const cellOfPotentialBoard = newPotentialBoard.getCell(i, j);
+
+			if (
+				cellOfPotentialBoard.figure &&
+				cellOfPotentialBoard.figure.color !== currentColor &&
+				cellOfPotentialBoard.figure.canMove(currentCell)
+			) {
+				return false;
+			}
 		}
 	}
 

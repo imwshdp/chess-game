@@ -106,7 +106,8 @@ summary {
 	width: calc(64px * 8);
 	height: auto;
 	min-height: 100px;
-	margin-top: 10px;
+
+	margin: 10px 0 20px 0;
 }
 
 h2 {

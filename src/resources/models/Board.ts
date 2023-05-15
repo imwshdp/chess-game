@@ -1,4 +1,4 @@
-import { checkingController } from 'resources/helpers/checkingController';
+import { checkingController, isCellIsSafe } from 'resources/helpers/checkingController';
 import Colors from 'resources/models/Colors';
 import Cell from 'resources/models/Cell';
 import { Figure, FigureName } from './figures/Figure';
@@ -215,32 +215,51 @@ class Board {
 	}
 
 	public checkPossibilityToCastle(king: Cell) {
+		const leftCell = this.getCell(king.x - 1, king.y);
+		const rightCell = this.getCell(king.x + 1, king.y);
+
+		const newKingLeftPosition = this.getCell(king.x - 2, king.y);
+		const newKingRightPosition = this.getCell(king.x + 2, king.y);
+
+		// WHITE CASTLES
 		if (king.figure?.color === Colors.WHITE) {
 			const leftRook = this.getCell(0, 7);
 			const rightRook = this.getCell(7, 7);
 
-			const leftCell = this.getCell(king.x - 1, king.y);
-			const rightCell = this.getCell(king.x + 1, king.y);
-
-			if (this.whiteCastle.withLeftRook && leftCell.available) {
+			if (
+				this.whiteCastle.withLeftRook &&
+				leftCell.available &&
+				isCellIsSafe(this, newKingLeftPosition, Colors.WHITE)
+			) {
 				leftRook.available = true;
 			}
 
-			if (this.whiteCastle.withRightRook && rightCell.available) {
+			if (
+				this.whiteCastle.withRightRook &&
+				rightCell.available &&
+				isCellIsSafe(this, newKingRightPosition, Colors.WHITE)
+			) {
 				rightRook.available = true;
 			}
+
+			// BLACK CASTLES
 		} else if (king.figure?.color === Colors.BLACK) {
 			const leftRook = this.getCell(0, 0);
 			const rightRook = this.getCell(7, 0);
 
-			const leftCell = this.getCell(king.x - 1, king.y);
-			const rightCell = this.getCell(king.x + 1, king.y);
-
-			if (this.whiteCastle.withLeftRook && leftCell.available) {
+			if (
+				this.blackCastle.withLeftRook &&
+				leftCell.available &&
+				isCellIsSafe(this, newKingLeftPosition, Colors.BLACK)
+			) {
 				leftRook.available = true;
 			}
 
-			if (this.whiteCastle.withRightRook && rightCell.available) {
+			if (
+				this.blackCastle.withRightRook &&
+				rightCell.available &&
+				isCellIsSafe(this, newKingRightPosition, Colors.BLACK)
+			) {
 				rightRook.available = true;
 			}
 		}
