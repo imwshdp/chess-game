@@ -23,8 +23,6 @@ export default class Pawn extends Figure {
 		const direction = this.cell.figure?.color === Colors.BLACK ? 1 : -1;
 		const firstStepDirection = this.cell.figure?.color === Colors.BLACK ? 2 : -2;
 
-		// moving behaviour
-
 		// if pawn want to move +1 OR ( this is pawn's first step AND pawn wanna move +2 )
 		// AND X coords of cell and target are equal
 		// AND target cell is empty
@@ -35,8 +33,6 @@ export default class Pawn extends Figure {
 		) {
 			return true;
 		}
-
-		// attacking behaviour
 
 		// if target Y coord = cell Y +/- 1 AND target X coord = +- X cell coord
 		// AND on target cell is staying enemy figure

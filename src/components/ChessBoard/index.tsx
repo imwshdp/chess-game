@@ -1,15 +1,15 @@
-import React, { useState, useEffect, LegacyRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from 'store';
 
-import { FigureName } from 'resources/models/figures/Figure';
+import { clickHandler } from 'resources/helpers/chessBoardController';
 import ChessCell from 'components/ChessCell';
 import Colors from 'resources/models/Colors';
 import Board from 'resources/models/Board';
 import Cell from 'resources/models/Cell';
 
-import css from './index.module.css';
 import StatusBar from 'components/StatusBar';
+import css from './index.module.css';
 
 interface BoardProps {
 	board: Board;
@@ -24,8 +24,7 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 		isGameEnded = store.gameEndStatus,
 		isGameStarted = store.gameStartStatus;
 
-	// selected cell state
-	const [selectedCell, setSelectedCell] = useState<Cell | null>(null);
+	const [selectedCell, setSelectedCell] = useState<Cell | null>(null); // selected cell state
 
 	// HIGHLIGHTING
 	useEffect(() => {
@@ -50,6 +49,12 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 		}
 	}, [currentPlayer]);
 
+	useEffect(() => {
+		if (!isGameStarted) {
+			setSelectedCell(null);
+		}
+	}, [isGameStarted]);
+
 	const handleClick = (cell: Cell) => {
 		// game start by first click (when game was restarted, but not started yet)
 		if (!isGameStarted && !isGameEnded && cell.figure?.color === Colors.WHITE) {
@@ -58,33 +63,15 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 
 		// MOVING TO CELL
 		if (selectedCell && selectedCell !== cell && cell.available) {
-			// check state rewriting for kings to false
-			if (!!board.whiteKing && board.whiteKing.figure) board.whiteKing.figure.checked = false;
-			if (!!board.blackKing && board.blackKing.figure) board.blackKing.figure.checked = false;
+			clickHandler({
+				cell,
+				board,
+				selectedCell,
+				setSelectedCell,
+			});
 
-			// MOVES HANDLER
-			if (
-				selectedCell.figure?.name === FigureName.KING &&
-				cell.figure?.name === FigureName.ROOK &&
-				selectedCell.figure.color === cell.figure.color
-			) {
-				// castles
-				handleCastle(selectedCell, cell);
-			} else {
-				if (selectedCell.figure?.name === FigureName.KING) {
-					selectedCell.figure.color === Colors.WHITE ? (board.whiteKing = cell) : (board.blackKing = cell);
-				}
-
-				// common move
-				selectedCell.moveFigure(cell);
-
-				castleActivityCheck(selectedCell, cell);
-			}
-
-			setSelectedCell(null);
-			checkmateCheck();
-
-			swapPlayer();
+			checkmateCheck(); // checkmate check
+			swapPlayer(); // swap player
 		} else {
 			// PICKING CELL
 			if (cell.blocked) return;
@@ -95,40 +82,7 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 		}
 	};
 
-	const handleCastle = (king: Cell, rook: Cell) => {
-		const color = king.figure?.color as Colors;
-
-		if (rook.x === 0) {
-			// left rook
-			const newKingPosition = board.getCell(king.x - 2, king.y);
-			rook.forceMove(board.getCell(king.x - 1, king.y));
-			king.forceMove(newKingPosition);
-			newKingPosition.figure?.color === Colors.WHITE
-				? (board.whiteKing = newKingPosition)
-				: (board.blackKing = newKingPosition);
-		} else if (rook.x === 7) {
-			// right rook
-			const newKingPosition = board.getCell(king.x + 2, king.y);
-			rook.forceMove(board.getCell(king.x + 1, king.y));
-			king.forceMove(newKingPosition);
-			newKingPosition.figure?.color === Colors.WHITE
-				? (board.whiteKing = newKingPosition)
-				: (board.blackKing = newKingPosition);
-		}
-
-		// lock castles for this color
-		blockCastlesForColor(color);
-	};
-
-	const blockCastlesForColor = (color: Colors) => {
-		board.blockCastlesForColor(color);
-	};
-
-	const highlightCells = (currentPlayerKing: Cell) => {
-		board.highlightCells(selectedCell, currentPlayerKing);
-		updateBoard();
-	};
-
+	// check checkmate
 	const checkmateCheck = () => {
 		const isCheckmated = board.checkmateCheck();
 		if (isCheckmated) {
@@ -136,8 +90,9 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 		}
 	};
 
-	const castleActivityCheck = (from: Cell, to: Cell) => {
-		board.castleActivityCheck(from, to);
+	const highlightCells = (currentPlayerKing: Cell) => {
+		board.highlightCells(selectedCell, currentPlayerKing);
+		updateBoard();
 	};
 
 	const stalemateCheck = () => {
@@ -153,9 +108,7 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 		setBoard(newBoard);
 	};
 
-	const blockCells = () => {
-		board.blockCells();
-	};
+	const blockCells = () => board.blockCells();
 
 	return (
 		<>

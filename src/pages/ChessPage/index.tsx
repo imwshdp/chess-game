@@ -54,7 +54,7 @@ const ChessPage: React.FC = observer(() => {
 		if (checkboxChecked) {
 			store.setGameTime(null);
 		} else {
-			if (!timeValue) return;
+			if (!timeValue || timeValue <= 0) return;
 			store.setGameTime(+timeValue);
 		}
 	};
@@ -79,9 +79,9 @@ const ChessPage: React.FC = observer(() => {
 			<Timer restart={restart} />
 
 			<div>
-				<h3>Съеденные фигуры</h3>
+				<h3>Побежденные фигуры</h3>
 				<div className='lost-figures'>
-					<BoxContainer title={'Черные'} figures={board.lostBlackFigures} />
+					<BoxContainer title={'Чёрные'} figures={board.lostBlackFigures} />
 					<BoxContainer title={'Белые'} figures={board.lostWhiteFigures} />
 				</div>
 			</div>

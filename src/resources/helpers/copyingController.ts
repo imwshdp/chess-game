@@ -1,5 +1,5 @@
-import Board from '../../resources/models/Board';
-import { FigureName } from '../../resources/models/figures/Figure';
+import Board from 'resources/models/Board';
+import { FigureName } from 'resources/models/figures/Figure';
 
 import Knight from 'resources/models/figures/Knight';
 import Bishop from 'resources/models/figures/Bishop';

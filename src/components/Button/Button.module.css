@@ -3,18 +3,23 @@
 	margin: 5px;
 	padding: 5px 15px !important;
 	color: black;
-	background: #f3f3f3;
-	border: 2px solid black;
+	background: var(--navWhite);
 	cursor: pointer;
 
 	font-family: 'Montserrat-Medium';
 	font-size: 0.8rem;
 	text-transform: uppercase;
 
-	transition: box-shadow 0.3s ease-in;
+	border: 2px solid transparent;
+	border-image: linear-gradient(215deg, rgb(216, 216, 216) 0%, #007acc 94%);
+	border-image-slice: 1;
+	transition: border-image 0.4s ease-in;
+
+	box-shadow: var(--hover-shadow);
 }
 
 .button:hover {
-	box-shadow: var(--hover-shadow);
-	transition: box-shadow 0.3s ease-in;
+	border-image: linear-gradient(215deg, #007acc 0%, rgb(216, 216, 216) 94%);
+	border-image-slice: 1;
+	transition: border-image 0.4s ease-in;
 }

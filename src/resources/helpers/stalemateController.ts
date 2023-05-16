@@ -1,7 +1,7 @@
-import Board from 'resources/models/Board';
-import { getDeepCopyBoard } from './copying';
-import Cell from 'resources/models/Cell';
+import { getDeepCopyBoard } from './copyingController';
 import Colors from 'resources/models/Colors';
+import Board from 'resources/models/Board';
+import Cell from 'resources/models/Cell';
 
 const isFigureCanMove = (board: Board): boolean => {
 	const cells: Cell[][] = board.cells;

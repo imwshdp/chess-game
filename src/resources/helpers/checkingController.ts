@@ -1,7 +1,7 @@
+import { getDeepCopyBoard } from './copyingController';
 import Colors from 'resources/models/Colors';
-import Board from '../../resources/models/Board';
-import Cell from '../../resources/models/Cell';
-import { getDeepCopyBoard } from './copying';
+import Board from 'resources/models/Board';
+import Cell from 'resources/models/Cell';
 
 export const checkingController = (board: Board, selectedCell: Cell, kingCell: Cell, x: number, y: number): boolean => {
 	if (selectedCell.figure && kingCell.figure) {

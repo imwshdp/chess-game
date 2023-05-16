@@ -73,10 +73,14 @@ const Timer: React.FC<TimerProps> = observer(({ restart }) => {
 		<section className={css.timer}>
 			<Button onClick={handleRestart}>Новая игра</Button>
 			{gameTime && (
-				<>
-					<h2>Черные: {blackTime}</h2>
-					<h2>Белые: {whiteTime}</h2>
-				</>
+				<div className={css.time}>
+					<h2>
+						Чёрные: <span>{blackTime}</span>
+					</h2>
+					<h2>
+						Белые: <span>{whiteTime}</span>
+					</h2>
+				</div>
 			)}
 		</section>
 	);

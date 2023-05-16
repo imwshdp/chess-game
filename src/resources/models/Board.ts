@@ -16,6 +16,11 @@ interface ICastle {
 	withRightRook: boolean;
 }
 
+interface IEnPassant {
+	pawn: Cell;
+	target: Cell;
+}
+
 class Board {
 	// cells grid
 	cells: Cell[][] = [];
@@ -38,6 +43,8 @@ class Board {
 		withLeftRook: true,
 		withRightRook: true,
 	};
+
+	enPassant: IEnPassant | undefined = undefined;
 
 	public initCells() {
 		for (let i = 0; i < 8; i++) {
@@ -70,6 +77,16 @@ class Board {
 
 		newBoard.whiteCastle = this.whiteCastle;
 		newBoard.blackCastle = this.blackCastle;
+
+		// newBoard.enPassant = this.enPassant;
+		if (this.enPassant) {
+			newBoard.enPassant = {
+				pawn: this.enPassant.pawn,
+				target: this.enPassant.target,
+			};
+		} else {
+			newBoard.enPassant = undefined;
+		}
 
 		return newBoard;
 	}
@@ -229,6 +246,9 @@ class Board {
 			if (
 				this.whiteCastle.withLeftRook &&
 				leftCell.available &&
+				this.getCell(1, 7).isEmpty() &&
+				this.getCell(2, 7).isEmpty() &&
+				this.getCell(3, 7).isEmpty() &&
 				isCellIsSafe(this, newKingLeftPosition, Colors.WHITE)
 			) {
 				leftRook.available = true;
@@ -237,6 +257,8 @@ class Board {
 			if (
 				this.whiteCastle.withRightRook &&
 				rightCell.available &&
+				this.getCell(5, 7).isEmpty() &&
+				this.getCell(6, 7).isEmpty() &&
 				isCellIsSafe(this, newKingRightPosition, Colors.WHITE)
 			) {
 				rightRook.available = true;
@@ -250,6 +272,9 @@ class Board {
 			if (
 				this.blackCastle.withLeftRook &&
 				leftCell.available &&
+				this.getCell(1, 0).isEmpty() &&
+				this.getCell(2, 0).isEmpty() &&
+				this.getCell(3, 0).isEmpty() &&
 				isCellIsSafe(this, newKingLeftPosition, Colors.BLACK)
 			) {
 				leftRook.available = true;
@@ -258,6 +283,8 @@ class Board {
 			if (
 				this.blackCastle.withRightRook &&
 				rightCell.available &&
+				this.getCell(5, 0).isEmpty() &&
+				this.getCell(6, 0).isEmpty() &&
 				isCellIsSafe(this, newKingRightPosition, Colors.BLACK)
 			) {
 				rightRook.available = true;
@@ -289,6 +316,43 @@ class Board {
 		}
 	}
 
+	public enPassantCheck(cellFrom: Cell, cellTo: Cell) {
+		if (this.enPassant && cellTo === this.enPassant.target) {
+			// beating pawn en passant
+			this.addLostFigure(this.enPassant.pawn.figure as Figure);
+
+			// delete figure on new cell
+			this.enPassant.pawn.figure = null;
+
+			// set pawn to new position
+			cellTo.figure = cellFrom.figure;
+			if (cellTo.figure) {
+				cellTo.figure.cell = cellTo;
+			}
+
+			// delete figure on old cell
+			cellFrom.figure = null;
+		}
+
+		// reset en passant of last turn
+		if (this.enPassant !== undefined) {
+			//  && cellTo.figure?.color !== this.enPassant.pawn.figure?.color
+			this.enPassant = undefined;
+		}
+
+		if (cellTo.figure?.name === FigureName.PAWN && Math.abs(cellFrom.y - cellTo.y) === 2) {
+			const target =
+				cellTo.figure.color === Colors.WHITE
+					? this.getCell(cellFrom.x, cellFrom.y - 1)
+					: this.getCell(cellFrom.x, cellFrom.y + 1);
+
+			this.enPassant = {
+				pawn: cellTo,
+				target: target,
+			};
+		}
+	}
+
 	public blockCastlesForColor(color: Colors) {
 		if (color === Colors.WHITE) {
 			this.whiteCastle.withLeftRook = false;
@@ -296,6 +360,18 @@ class Board {
 		} else if (color === Colors.BLACK) {
 			this.blackCastle.withLeftRook = false;
 			this.blackCastle.withRightRook = false;
+		}
+	}
+
+	public highlightEnPassantFor(cell: Cell, target: Cell) {
+		const enPassantTarget = this.enPassant?.target as Cell;
+
+		// for white pawns
+		if (cell.figure?.color === Colors.WHITE && enPassantTarget.y < cell.y) {
+			target.available = true;
+		} else if (cell.figure?.color === Colors.BLACK && enPassantTarget.y > cell.y) {
+			// for black pawns
+			target.available = true;
 		}
 	}
 
@@ -309,7 +385,7 @@ class Board {
 				if (selectedCell) isKingInDangerAfterMove = checkingController(this, selectedCell, currentPlayerKing, i, j);
 
 				// if check is active => highlight only check preventing cells
-				if (currentPlayerKing.figure?.checked && selectedCell?.figure?.canMove(target) === true) {
+				if (currentPlayerKing.figure?.checked && selectedCell?.figure?.canMove(target)) {
 					if (!isKingInDangerAfterMove) {
 						target.available = true;
 					}
@@ -317,6 +393,18 @@ class Board {
 					// else highlight target if this move will not bring check
 					if (!isKingInDangerAfterMove) {
 						target.available = !!selectedCell?.figure?.canMove(target);
+
+						// en passant cell highlight
+						if (
+							this.enPassant &&
+							this.enPassant.target.x === target.x &&
+							this.enPassant.target.y === target.y &&
+							selectedCell?.figure?.name === FigureName.PAWN &&
+							Math.abs(this.enPassant.target.x - selectedCell.x) === 1 &&
+							Math.abs(this.enPassant.target.y - selectedCell.y) === 1
+						) {
+							this.highlightEnPassantFor(selectedCell, target);
+						}
 					}
 				}
 			}
