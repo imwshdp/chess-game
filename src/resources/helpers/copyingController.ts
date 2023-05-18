@@ -24,7 +24,8 @@ export const getDeepCopyBoard = (board: Board): Board => {
 						break;
 
 					case FigureName.KING:
-						new King(figureColor, copyBoard.getCell(i, j));
+						const king = new King(figureColor, copyBoard.getCell(i, j));
+						king.checked = (currentCell.figure as King).checked;
 						break;
 
 					case FigureName.KNIGHT:
@@ -32,7 +33,8 @@ export const getDeepCopyBoard = (board: Board): Board => {
 						break;
 
 					case FigureName.PAWN:
-						new Pawn(figureColor, copyBoard.getCell(i, j));
+						const pawn = new Pawn(figureColor, copyBoard.getCell(i, j));
+						pawn.isFirstStep = (currentCell.figure as Pawn).isFirstStep;
 						break;
 
 					case FigureName.QUEEN:
@@ -45,6 +47,41 @@ export const getDeepCopyBoard = (board: Board): Board => {
 				}
 			}
 		}
+	}
+
+	if (board.whiteKing && board.blackKing) {
+		const whiteKing = copyBoard.getCell(board.whiteKing?.x, board.whiteKing?.y);
+		const blackKing = copyBoard.getCell(board.blackKing?.x, board.blackKing?.y);
+
+		copyBoard.whiteKing = whiteKing;
+		copyBoard.blackKing = blackKing;
+	}
+
+	if (board.enPassant) {
+		const pawn = board.enPassant.pawn;
+		const target = board.enPassant.target;
+
+		copyBoard.enPassant = {
+			pawn: copyBoard.getCell(pawn.x, pawn.y),
+			target: copyBoard.getCell(target.x, target.y),
+		};
+	} else {
+		copyBoard.enPassant = undefined;
+	}
+
+	if (board.whiteCastle && board.blackCastle) {
+		const whiteCastle = board.whiteCastle;
+		const blackCastle = board.blackCastle;
+
+		copyBoard.whiteCastle = {
+			withLeftRook: whiteCastle.withLeftRook,
+			withRightRook: whiteCastle.withRightRook,
+		};
+
+		copyBoard.blackCastle = {
+			withLeftRook: blackCastle.withLeftRook,
+			withRightRook: blackCastle.withRightRook,
+		};
 	}
 
 	return copyBoard;

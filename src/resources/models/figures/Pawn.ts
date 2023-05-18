@@ -1,6 +1,7 @@
 import { Figure, FigureName } from './Figure';
-import Cell from 'resources/models/Cell';
 import Colors from 'resources/models/Colors';
+import Cell from 'resources/models/Cell';
+import Board from '../Board';
 
 import blackLogo from 'assets/black-pawn.png';
 import whiteLogo from 'assets/white-pawn.png';
@@ -14,8 +15,8 @@ export default class Pawn extends Figure {
 		this.logo = color === Colors.BLACK ? blackLogo : whiteLogo;
 	}
 
-	canMove(target: Cell): boolean {
-		if (!super.canMove(target)) {
+	canMove(target: Cell, board: Board): boolean {
+		if (!super.canMove(target, board)) {
 			return false;
 		}
 
@@ -39,7 +40,10 @@ export default class Pawn extends Figure {
 		if (
 			target.y === this.cell.y + direction &&
 			(target.x === this.cell.x + 1 || target.x === this.cell.x - 1) &&
-			this.cell.isEnemy(target)
+			(this.cell.isEnemy(target) ||
+				(target.x === board.enPassant?.target.x &&
+					target.y === board.enPassant?.target.y &&
+					this.color !== board.enPassant.pawn.figure?.color))
 		) {
 			return true;
 		}

@@ -1,7 +1,8 @@
 import { checkingController, isCellIsSafe } from 'resources/helpers/checkingController';
+import { stalemateController } from 'resources/helpers/stalemateController';
+import { Figure, FigureName } from './figures/Figure';
 import Colors from 'resources/models/Colors';
 import Cell from 'resources/models/Cell';
-import { Figure, FigureName } from './figures/Figure';
 
 import Knight from 'resources/models/figures/Knight';
 import Bishop from 'resources/models/figures/Bishop';
@@ -9,7 +10,7 @@ import Queen from 'resources/models/figures/Queen';
 import Pawn from 'resources/models/figures/Pawn';
 import King from 'resources/models/figures/King';
 import Rook from 'resources/models/figures/Rook';
-import { stalemateController } from 'resources/helpers/stalemateController';
+import { getDeepCopyBoard } from 'resources/helpers/copyingController';
 
 interface ICastle {
 	withLeftRook: boolean;
@@ -78,15 +79,7 @@ class Board {
 		newBoard.whiteCastle = this.whiteCastle;
 		newBoard.blackCastle = this.blackCastle;
 
-		// newBoard.enPassant = this.enPassant;
-		if (this.enPassant) {
-			newBoard.enPassant = {
-				pawn: this.enPassant.pawn,
-				target: this.enPassant.target,
-			};
-		} else {
-			newBoard.enPassant = undefined;
-		}
+		newBoard.enPassant = this.enPassant;
 
 		return newBoard;
 	}
@@ -100,13 +93,13 @@ class Board {
 				const cell = this.getCell(i, j);
 
 				// white king checking
-				if (this.whiteKing && cell.figure?.canMove(this.whiteKing)) {
+				if (this.whiteKing && cell.figure?.canMove(this.whiteKing, this)) {
 					this.blockCells();
 					if (!!this.whiteKing.figure) this.whiteKing.figure.checked = true; // mark the check
 				}
 
 				// black king checking
-				if (this.blackKing && cell.figure?.canMove(this.blackKing)) {
+				if (this.blackKing && cell.figure?.canMove(this.blackKing, this)) {
 					this.blockCells();
 					if (!!this.blackKing.figure) this.blackKing.figure.checked = true; // mark the check
 				}
@@ -128,7 +121,7 @@ class Board {
 	public isKingInDanger(king: Cell, cells: Cell[][]): boolean {
 		for (let i = 0; i < cells.length; i++) {
 			for (let j = 0; j < cells[i].length; j++) {
-				if (cells[j][i].figure?.canMove(king)) {
+				if (cells[j][i].figure?.canMove(king, this)) {
 					return true;
 				}
 			}
@@ -193,7 +186,7 @@ class Board {
 		for (let i = 0; i < 8; i++) {
 			for (let j = 0; j < 8; j++) {
 				const target = this.getCell(i, j);
-				if (!cell.figure?.canMove(target)) continue;
+				if (!cell.figure?.canMove(target, this)) continue;
 				const isKingInDangerAfterMove = checkingController(this, cell, king, i, j);
 				if (!isKingInDangerAfterMove) {
 					return true;
@@ -207,7 +200,7 @@ class Board {
 		return stalemateController(this, currentPlayerKing);
 	}
 
-	public blockCells(): void {
+	public blockCells() {
 		for (let i = 0; i < this.cells.length; i++) {
 			for (let j = 0; j < this.cells[i].length; j++) {
 				this.getCell(i, j).blocked = true;
@@ -215,7 +208,7 @@ class Board {
 		}
 	}
 
-	public unblockCells(): void {
+	public unblockCells() {
 		for (let i = 0; i < this.cells.length; i++) {
 			for (let j = 0; j < this.cells[i].length; j++) {
 				this.getCell(i, j).blocked = false;
@@ -316,43 +309,6 @@ class Board {
 		}
 	}
 
-	public enPassantCheck(cellFrom: Cell, cellTo: Cell) {
-		if (this.enPassant && cellTo === this.enPassant.target) {
-			// beating pawn en passant
-			this.addLostFigure(this.enPassant.pawn.figure as Figure);
-
-			// delete figure on new cell
-			this.enPassant.pawn.figure = null;
-
-			// set pawn to new position
-			cellTo.figure = cellFrom.figure;
-			if (cellTo.figure) {
-				cellTo.figure.cell = cellTo;
-			}
-
-			// delete figure on old cell
-			cellFrom.figure = null;
-		}
-
-		// reset en passant of last turn
-		if (this.enPassant !== undefined) {
-			//  && cellTo.figure?.color !== this.enPassant.pawn.figure?.color
-			this.enPassant = undefined;
-		}
-
-		if (cellTo.figure?.name === FigureName.PAWN && Math.abs(cellFrom.y - cellTo.y) === 2) {
-			const target =
-				cellTo.figure.color === Colors.WHITE
-					? this.getCell(cellFrom.x, cellFrom.y - 1)
-					: this.getCell(cellFrom.x, cellFrom.y + 1);
-
-			this.enPassant = {
-				pawn: cellTo,
-				target: target,
-			};
-		}
-	}
-
 	public blockCastlesForColor(color: Colors) {
 		if (color === Colors.WHITE) {
 			this.whiteCastle.withLeftRook = false;
@@ -363,15 +319,30 @@ class Board {
 		}
 	}
 
-	public highlightEnPassantFor(cell: Cell, target: Cell) {
-		const enPassantTarget = this.enPassant?.target as Cell;
+	public enPassantCheck(cellFrom: Cell, cellTo: Cell) {
+		if (this.enPassant && cellFrom.figure?.name === FigureName.PAWN && cellTo === this.enPassant.target) {
+			this.addLostFigure(this.enPassant.pawn.figure as Figure); // beating pawn en passant
+			this.enPassant.pawn.figure = null; // delete figure on new cell
 
-		// for white pawns
-		if (cell.figure?.color === Colors.WHITE && enPassantTarget.y < cell.y) {
-			target.available = true;
-		} else if (cell.figure?.color === Colors.BLACK && enPassantTarget.y > cell.y) {
-			// for black pawns
-			target.available = true;
+			cellTo.figure = cellFrom.figure; // set pawn to new position
+			if (cellTo.figure) cellTo.figure.cell = cellTo;
+			cellFrom.figure = null; // delete figure on old cell
+		}
+
+		// reset en passant of last turn
+		if (this.enPassant !== undefined) {
+			this.enPassant = undefined;
+		}
+
+		if (cellTo.figure?.name === FigureName.PAWN && Math.abs(cellFrom.y - cellTo.y) === 2) {
+			const target =
+				cellTo.figure.color === Colors.WHITE
+					? this.getCell(cellFrom.x, cellFrom.y - 1)
+					: this.getCell(cellFrom.x, cellFrom.y + 1);
+			this.enPassant = {
+				pawn: cellTo,
+				target: target,
+			};
 		}
 	}
 
@@ -385,26 +356,14 @@ class Board {
 				if (selectedCell) isKingInDangerAfterMove = checkingController(this, selectedCell, currentPlayerKing, i, j);
 
 				// if check is active => highlight only check preventing cells
-				if (currentPlayerKing.figure?.checked && selectedCell?.figure?.canMove(target)) {
+				if (currentPlayerKing.figure?.checked && selectedCell?.figure?.canMove(target, this)) {
 					if (!isKingInDangerAfterMove) {
 						target.available = true;
 					}
 				} else {
 					// else highlight target if this move will not bring check
 					if (!isKingInDangerAfterMove) {
-						target.available = !!selectedCell?.figure?.canMove(target);
-
-						// en passant cell highlight
-						if (
-							this.enPassant &&
-							this.enPassant.target.x === target.x &&
-							this.enPassant.target.y === target.y &&
-							selectedCell?.figure?.name === FigureName.PAWN &&
-							Math.abs(this.enPassant.target.x - selectedCell.x) === 1 &&
-							Math.abs(this.enPassant.target.y - selectedCell.y) === 1
-						) {
-							this.highlightEnPassantFor(selectedCell, target);
-						}
+						target.available = !!selectedCell?.figure?.canMove(target, this);
 					}
 				}
 			}
@@ -416,8 +375,61 @@ class Board {
 		}
 	}
 
-	addLostFigure(figure: Figure) {
+	public addLostFigure(figure: Figure) {
 		figure.color === Colors.BLACK ? this.lostBlackFigures.push(figure) : this.lostWhiteFigures.push(figure);
+	}
+
+	public aiMove() {
+		const kingCell = this.blackKing as Cell;
+		const blackFiguresList: Cell[] = []; // THIS
+
+		for (let i = 0; i < this.cells.length; i++) {
+			for (let j = 0; j < this.cells[i].length; j++) {
+				const cell = this.getCell(i, j);
+				if (cell.figure && cell.figure.color === Colors.BLACK) {
+					blackFiguresList.push(cell);
+				}
+			}
+		}
+
+		let index;
+
+		while (blackFiguresList.length) {
+			const availableList: Cell[] = [];
+
+			const newPotentialBoard: Board = getDeepCopyBoard(this); // new board
+
+			index = Math.floor(Math.random() * blackFiguresList.length);
+			const randomSelectedCell = newPotentialBoard.getCell(blackFiguresList[index].x, blackFiguresList[index].y); // COPY
+			const blackPlayerKing = newPotentialBoard.getCell(kingCell?.x, kingCell?.y); // COPY
+			newPotentialBoard.highlightCells(randomSelectedCell, blackPlayerKing); // COPY
+
+			blackFiguresList.splice(index, 1);
+
+			for (let i = 0; i < newPotentialBoard.cells.length; i++) {
+				for (let j = 0; j < newPotentialBoard.cells[i].length; j++) {
+					const cell = newPotentialBoard.getCell(i, j);
+					if (cell.available && cell !== randomSelectedCell) availableList.push(cell);
+				}
+			}
+
+			if (availableList.length) {
+				index = Math.floor(Math.random() * availableList.length);
+
+				const selectedCell = this.getCell(randomSelectedCell.x, randomSelectedCell.y);
+				const cell = this.getCell(availableList[index].x, availableList[index].y);
+
+				return {
+					selectedCell: selectedCell,
+					cell: cell,
+				};
+			}
+		}
+
+		return {
+			selectedCell: null,
+			cell: null,
+		};
 	}
 
 	// adding figures methods

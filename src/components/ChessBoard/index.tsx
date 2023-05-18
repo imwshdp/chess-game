@@ -22,7 +22,8 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 	const store = useStore();
 	const currentPlayer = store.currentPlayer,
 		isGameEnded = store.gameEndStatus,
-		isGameStarted = store.gameStartStatus;
+		isGameStarted = store.gameStartStatus,
+		aiStatus = store.aiStatus;
 
 	const [selectedCell, setSelectedCell] = useState<Cell | null>(null); // selected cell state
 
@@ -34,7 +35,7 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 		}
 	}, [selectedCell]);
 
-	// GAME ENDING
+	// GAME END
 	useEffect(() => {
 		if (isGameEnded) {
 			setSelectedCell(null);
@@ -42,10 +43,16 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 		}
 	}, [isGameEnded]);
 
+	// GAME STALEMATE
 	useEffect(() => {
 		if (isGameStarted && stalemateCheck()) {
 			store.setGameStalemate();
 			store.setGameEnd();
+		}
+
+		// AI MOVE
+		if (currentPlayer?.color === Colors.BLACK && aiStatus) {
+			aiMove();
 		}
 	}, [currentPlayer]);
 
@@ -54,6 +61,32 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 			setSelectedCell(null);
 		}
 	}, [isGameStarted]);
+
+	const aiMove = () => {
+		const { selectedCell, cell } = board.aiMove();
+
+		if (selectedCell === null && cell === null) {
+			store.setGameEnd();
+		} else {
+			setTimeout(() => {
+				setSelectedCell(selectedCell);
+			}, 1000);
+
+			setTimeout(() => {
+				clickHandler({
+					cell,
+					board,
+					selectedCell,
+					setSelectedCell,
+				});
+
+				updateBoard();
+
+				checkmateCheck(); // checkmate check
+				swapPlayer(); // swap player
+			}, 2000);
+		}
+	};
 
 	const handleClick = (cell: Cell) => {
 		// game start by first click (when game was restarted, but not started yet)
@@ -106,6 +139,8 @@ const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer
 	const updateBoard = () => {
 		const newBoard = board.getCopyBoard();
 		setBoard(newBoard);
+
+		console.log(newBoard);
 	};
 
 	const blockCells = () => board.blockCells();

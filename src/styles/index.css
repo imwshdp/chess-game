@@ -89,6 +89,16 @@ summary {
 	opacity: 0;
 }
 
+.settings-form label {
+	display: flex;
+	align-items: center;
+
+	margin-bottom: 0;
+	margin-top: 0;
+
+	font-size: 0.95rem;
+}
+
 .settings-form input[type='checkbox'] {
 	margin-left: 0;
 	cursor: pointer;

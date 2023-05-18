@@ -128,7 +128,7 @@ export default class Cell {
 	}
 
 	moveFigure(target: Cell) {
-		if (this.figure && this.figure?.canMove(target)) {
+		if (this.figure && this.figure?.canMove(target, target.board)) {
 			// moving figure
 			this.figure.moveFigure(target);
 

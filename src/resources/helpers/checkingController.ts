@@ -38,7 +38,7 @@ export const isCellIsSafe = (board: Board, cell: Cell, currentColor: Colors): bo
 			if (
 				cellOfPotentialBoard.figure &&
 				cellOfPotentialBoard.figure.color !== currentColor &&
-				cellOfPotentialBoard.figure.canMove(currentCell)
+				cellOfPotentialBoard.figure.canMove(currentCell, newPotentialBoard)
 			) {
 				return false;
 			}

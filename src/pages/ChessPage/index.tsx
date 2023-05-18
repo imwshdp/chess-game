@@ -49,13 +49,20 @@ const ChessPage: React.FC = observer(() => {
 
 		const form = event.target;
 		const timeValue = form.setTime.value;
-		const checkboxChecked = form.timerSwitch.checked;
+		const checkboxTimerChecked = form.timerSwitch.checked;
+		const checkboxAIChecked = form.AISwitch.checked;
 
-		if (checkboxChecked) {
-			store.setGameTime(null);
+		if (checkboxAIChecked) {
+			store.switchAiStatus(true);
 		} else {
+			store.switchAiStatus(false);
+		}
+
+		if (checkboxTimerChecked) {
 			if (!timeValue || timeValue <= 0) return;
 			store.setGameTime(+timeValue);
+		} else {
+			store.setGameTime(null);
 		}
 	};
 
@@ -68,7 +75,12 @@ const ChessPage: React.FC = observer(() => {
 
 					<label>
 						<input type='checkbox' name='timerSwitch'></input>
-						Отключить таймер
+						Включить таймер
+					</label>
+
+					<label>
+						<input type='checkbox' name='AISwitch'></input>
+						Игра с ботом
 					</label>
 
 					<Button onSubmit={event => handleSubmit}>Применить настройки</Button>
