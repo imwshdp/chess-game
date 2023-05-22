@@ -1,46 +1,32 @@
-# Getting Started with Create React App
+# Веб-приложение "Шахматы"
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Приложение написано на JavaScript библиотеке React с использованием языка TypeScript и стейт-менеджера MobX.\
 
-## Available Scripts
+Также приложение использует такие прикладные инструменты, как: React Router, React Context, модульные CSS стили.
 
-In the project directory, you can run:
+Посмотреть результат можно по [ссылке](https://react-typescript-chess-app.vercel.app/).
 
-### `npm start`
+Разработанные шахматы имеют классические правила и возможность включения опционального таймера с комфортным временем для игры для обоих игроков. По умолчанию игра не имеет ограничения по времени.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Игра поддерживает следующие приёмы и варианты развития событий:
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+- Мат (Ситуация, когда король находится под шахом, и игрок не может сделать ни одного хода, чтобы его избежать)
+- Пат (Положение в игре, когда один из игроков не может сделать хода, не подставив под удар своего короля)
+- Проигрыш по истечению времени (Игрок, первый израсходовавший всё своё время, признаётся проигравшим независимо от положения в партии)
+- Рокировка (Одновременный ход королём и ладьёй, при котором ладья придвигается к королю, а король ставится рядом по другую её сторону)
+- Взятие на проходе (Специальный ход пешки, при котором она берёт пешку противника, перемещённую с начальной позиции сразу на два поля)
 
-### `npm test`
+Шахматы исключают возможность самостоятельно подставить короля под шах передвижением союзной фигуры или самого короля.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Также, в случае шаха, для передвижения будут доступны только те фигуры, которые могут предотвратить опасность для своего короля.
 
-### `npm run build`
+Побежденные фигуры каждого игрока отображаются под игровым полем.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+В случае завершения игры, игроки будут уведомлены о статусе игры всплывающим окном, появляющимся в правом верхнем углу экрана.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Базовый код игры написан по [обучающему ролику](https://www.youtube.com/watch?v=mUvYGUYMvKo) YouTube канала Ulbi TV.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Локальный запуск проекта
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Запуск проекта на локальном сервере (http://localhost:3000/) производится командой _npm start_.\
+Установить необходимые для запуска модули Node.js можно командой _npm i_.
