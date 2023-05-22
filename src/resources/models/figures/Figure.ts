@@ -1,6 +1,7 @@
 import Cell from 'resources/models/Cell';
 import Colors from 'resources/models/Colors';
 import logo from 'assets/black-king.png';
+import Board from '../Board';
 
 export enum FigureName {
 	FIGURE = 'Фигура',
@@ -33,7 +34,7 @@ export class Figure {
 		this.id = Math.random();
 	}
 
-	canMove(target: Cell): boolean {
+	canMove(target: Cell, board: Board): boolean {
 		// self figure beating prevention
 		if (target.figure?.color === this.color) return false;
 		return true;

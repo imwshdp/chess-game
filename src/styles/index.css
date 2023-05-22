@@ -50,55 +50,6 @@ summary {
 	cursor: pointer;
 }
 
-.settings-form {
-	display: flex;
-	flex-direction: column;
-}
-
-.settings-form * {
-	margin: 5px;
-	padding: 5px;
-}
-
-.settings-form input[type='text'] {
-	font-family: 'Montserrat-Light';
-	font-size: 0.8rem;
-	letter-spacing: 1px;
-
-	border: 1px solid black;
-	border-radius: 4.5px;
-}
-
-.settings-form input[type='text']:focus,
-.settings-form input[type='text']:active {
-	outline: none;
-}
-
-.settings-form input[type='text']::placeholder {
-	opacity: 1;
-	transition: opacity 0.5s ease-in-out;
-}
-
-.settings-form input[type='text']:hover::placeholder {
-	opacity: 0;
-	transition: opacity 0.5s ease-in-out;
-}
-
-.settings-form input[type='text']:focus::placeholder,
-.settings-form input[type='text']:active::placeholder {
-	opacity: 0;
-}
-
-.settings-form input[type='checkbox'] {
-	margin-left: 0;
-	cursor: pointer;
-}
-
-.settings-form button {
-	margin: auto;
-	margin-bottom: 20px;
-}
-
 .lost-figures {
 	display: flex;
 	flex-flow: row;

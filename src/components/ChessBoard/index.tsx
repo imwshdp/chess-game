@@ -1,135 +1,82 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from 'store';
 
 import { clickHandler } from 'resources/helpers/chessBoardController';
+import StatusBar from 'components/StatusBar';
 import ChessCell from 'components/ChessCell';
 import Colors from 'resources/models/Colors';
 import Board from 'resources/models/Board';
 import Cell from 'resources/models/Cell';
 
-import StatusBar from 'components/StatusBar';
 import css from './index.module.css';
 
-interface BoardProps {
+interface TProps {
 	board: Board;
-	setBoard: (board: Board) => void;
-	swapPlayer: () => void;
+	selectedCell: Cell | null;
+	setSelectedCell: React.Dispatch<React.SetStateAction<Cell | null>>;
+
 	currentPlayerBadge: React.RefObject<HTMLSpanElement> | null;
+
+	checkmateCheck: () => void;
+	swapPlayer: () => void;
 }
 
-const ChessBoard: React.FC<BoardProps> = observer(({ board, setBoard, swapPlayer, currentPlayerBadge }) => {
-	const store = useStore();
-	const currentPlayer = store.currentPlayer,
-		isGameEnded = store.gameEndStatus,
-		isGameStarted = store.gameStartStatus;
+const ChessBoard: React.FC<TProps> = observer(
+	({ board, selectedCell, setSelectedCell, currentPlayerBadge, checkmateCheck, swapPlayer }) => {
+		const store = useStore();
+		const currentPlayer = store.currentPlayer,
+			isGameEnded = store.gameEndStatus,
+			isGameStarted = store.gameStartStatus;
 
-	const [selectedCell, setSelectedCell] = useState<Cell | null>(null); // selected cell state
-
-	// HIGHLIGHTING
-	useEffect(() => {
-		if (board.blackKing && board.whiteKing) {
-			const currentPlayerKing = currentPlayer?.color === Colors.WHITE ? board.whiteKing : board.blackKing;
-			highlightCells(currentPlayerKing);
-		}
-	}, [selectedCell]);
-
-	// GAME ENDING
-	useEffect(() => {
-		if (isGameEnded) {
-			setSelectedCell(null);
-			blockCells();
-		}
-	}, [isGameEnded]);
-
-	useEffect(() => {
-		if (isGameStarted && stalemateCheck()) {
-			store.setGameStalemate();
-			store.setGameEnd();
-		}
-	}, [currentPlayer]);
-
-	useEffect(() => {
-		if (!isGameStarted) {
-			setSelectedCell(null);
-		}
-	}, [isGameStarted]);
-
-	const handleClick = (cell: Cell) => {
-		// game start by first click (when game was restarted, but not started yet)
-		if (!isGameStarted && !isGameEnded && cell.figure?.color === Colors.WHITE) {
-			store.startGame();
-		}
-
-		// MOVING TO CELL
-		if (selectedCell && selectedCell !== cell && cell.available) {
-			clickHandler({
-				cell,
-				board,
-				selectedCell,
-				setSelectedCell,
-			});
-
-			checkmateCheck(); // checkmate check
-			swapPlayer(); // swap player
-		} else {
-			// PICKING CELL
-			if (cell.blocked) return;
-
-			if (cell.figure?.color === currentPlayer?.color) {
-				setSelectedCell(cell); // if cell contains figure => change state and select this cell
+		const handleClick = (cell: Cell) => {
+			// game start by first click (when game was restarted, but not started yet)
+			if (!isGameStarted && !isGameEnded && cell.figure?.color === Colors.WHITE) {
+				store.startGame();
 			}
-		}
-	};
 
-	// check checkmate
-	const checkmateCheck = () => {
-		const isCheckmated = board.checkmateCheck();
-		if (isCheckmated) {
-			store.setGameEnd();
-		}
-	};
+			// MOVING TO CELL
+			if (selectedCell && selectedCell !== cell && cell.available) {
+				clickHandler({
+					cell,
+					board,
+					selectedCell,
+					setSelectedCell,
+				});
 
-	const highlightCells = (currentPlayerKing: Cell) => {
-		board.highlightCells(selectedCell, currentPlayerKing);
-		updateBoard();
-	};
+				checkmateCheck(); // checkmate check
+				swapPlayer(); // swap player
+			} else {
+				// PICKING CELL
+				if (cell.blocked) return;
 
-	const stalemateCheck = () => {
-		if (currentPlayer) {
-			return board.isGameStalemated(
-				currentPlayer.color === Colors.WHITE ? (board.whiteKing as Cell) : (board.blackKing as Cell)
-			);
-		}
-	};
+				if (cell.figure?.color === currentPlayer?.color) {
+					setSelectedCell(cell); // if cell contains figure => change state and select this cell
+				}
+			}
+		};
 
-	const updateBoard = () => {
-		const newBoard = board.getCopyBoard();
-		setBoard(newBoard);
-	};
+		return (
+			<>
+				<StatusBar currentPlayerBadge={currentPlayerBadge} />
 
-	const blockCells = () => board.blockCells();
-
-	return (
-		<>
-			<StatusBar currentPlayerBadge={currentPlayerBadge} />
-
-			<div className={css.board}>
-				{board.cells.map((row, index) => (
-					<React.Fragment key={index}>
-						{row.map(cell => (
-							<ChessCell
-								cell={cell}
-								key={cell.id}
-								selected={cell.x === selectedCell?.x && cell.y === selectedCell?.y ? true : false}
-								click={handleClick}
-							/>
-						))}
-					</React.Fragment>
-				))}
-			</div>
-		</>
-	);
-});
+				<div className={css.board}>
+					{board.cells.map((row, index) => (
+						<React.Fragment key={index}>
+							{row.map(cell => (
+								<ChessCell
+									cell={cell}
+									key={cell.id}
+									selected={cell.x === selectedCell?.x && cell.y === selectedCell?.y ? true : false}
+									click={handleClick}
+								/>
+							))}
+						</React.Fragment>
+					))}
+				</div>
+			</>
+		);
+	}
+);
 
 export default ChessBoard;

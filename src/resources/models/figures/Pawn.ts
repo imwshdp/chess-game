@@ -1,6 +1,7 @@
 import { Figure, FigureName } from './Figure';
-import Cell from 'resources/models/Cell';
 import Colors from 'resources/models/Colors';
+import Cell from 'resources/models/Cell';
+import Board from '../Board';
 
 import blackLogo from 'assets/black-pawn.png';
 import whiteLogo from 'assets/white-pawn.png';
@@ -14,8 +15,8 @@ export default class Pawn extends Figure {
 		this.logo = color === Colors.BLACK ? blackLogo : whiteLogo;
 	}
 
-	canMove(target: Cell): boolean {
-		if (!super.canMove(target)) {
+	canMove(target: Cell, board: Board): boolean {
+		if (!super.canMove(target, board)) {
 			return false;
 		}
 
@@ -23,12 +24,21 @@ export default class Pawn extends Figure {
 		const direction = this.cell.figure?.color === Colors.BLACK ? 1 : -1;
 		const firstStepDirection = this.cell.figure?.color === Colors.BLACK ? 2 : -2;
 
-		// if pawn want to move +1 OR ( this is pawn's first step AND pawn wanna move +2 )
-		// AND X coords of cell and target are equal
-		// AND target cell is empty
+		// pawn's step
 		if (
-			(target.y === this.cell.y + direction || (this.isFirstStep && target.y === this.cell.y + firstStepDirection)) &&
+			target.y === this.cell.y + direction &&
 			target.x === this.cell.x &&
+			this.cell.board.getCell(target.x, target.y).isEmpty()
+		) {
+			return true;
+		}
+
+		// pawn's first step
+		if (
+			this.isFirstStep &&
+			target.y === this.cell.y + firstStepDirection &&
+			target.x === this.cell.x &&
+			this.cell.board.getCell(this.cell.x, this.cell.y + direction).isEmpty() &&
 			this.cell.board.getCell(target.x, target.y).isEmpty()
 		) {
 			return true;
@@ -39,7 +49,10 @@ export default class Pawn extends Figure {
 		if (
 			target.y === this.cell.y + direction &&
 			(target.x === this.cell.x + 1 || target.x === this.cell.x - 1) &&
-			this.cell.isEnemy(target)
+			(this.cell.isEnemy(target) ||
+				(target.x === board.enPassant?.target.x &&
+					target.y === board.enPassant?.target.y &&
+					this.color !== board.enPassant.pawn.figure?.color))
 		) {
 			return true;
 		}

@@ -14,10 +14,6 @@ interface IClickHandlerParams {
 // CELL CLICK HANDLER
 export const clickHandler = ({ cell, board, selectedCell, setSelectedCell }: IClickHandlerParams) => {
 	if (selectedCell) {
-		// check state rewriting for kings to false
-		if (!!board.whiteKing && board.whiteKing.figure) board.whiteKing.figure.checked = false;
-		if (!!board.blackKing && board.blackKing.figure) board.blackKing.figure.checked = false;
-
 		// MOVES HANDLER
 		if (
 			selectedCell.figure?.name === FigureName.KING &&
@@ -27,12 +23,20 @@ export const clickHandler = ({ cell, board, selectedCell, setSelectedCell }: ICl
 			// castles
 			handleCastle(board, selectedCell, cell);
 		} else {
-			if (selectedCell.figure?.name === FigureName.KING) {
-				selectedCell.figure.color === Colors.WHITE ? (board.whiteKing = cell) : (board.blackKing = cell);
-			}
+			// check state rewriting for kings to false
+			if (!!board.whiteKing && board.whiteKing.figure) board.whiteKing.figure.checked = false;
+			if (!!board.blackKing && board.blackKing.figure) board.blackKing.figure.checked = false;
 
 			// common move
 			selectedCell.moveFigure(cell);
+
+			if (cell.figure?.name === FigureName.KING) {
+				if (cell.figure.color === Colors.WHITE) {
+					board.whiteKing = cell;
+				} else if (cell.figure.color === Colors.BLACK) {
+					board.blackKing = cell;
+				}
+			}
 
 			// special moves checks
 			castleActivityCheck(board, selectedCell, cell);

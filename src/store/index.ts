@@ -12,13 +12,17 @@ export default class chessStore {
 	private _isGameEnded: boolean;
 	private _isStalemated: boolean;
 
+	private _isAiEnabled: boolean;
+
 	constructor() {
-		this._gameTime = 600;
+		this._gameTime = null;
 		this._currentPlayer = null;
 
 		this._isGameStarted = false;
 		this._isGameEnded = false;
 		this._isStalemated = false;
+
+		this._isAiEnabled = false;
 
 		makeAutoObservable(this);
 	}
@@ -50,6 +54,10 @@ export default class chessStore {
 		this._currentPlayer = player;
 	}
 
+	switchAiStatus(newStatus: boolean) {
+		this._isAiEnabled = newStatus;
+	}
+
 	// GETTERS
 	get gameStartStatus(): boolean {
 		return this._isGameStarted;
@@ -69,6 +77,10 @@ export default class chessStore {
 
 	get currentPlayer(): Player | null {
 		return this._currentPlayer;
+	}
+
+	get aiStatus(): boolean {
+		return this._isAiEnabled;
 	}
 }
 
