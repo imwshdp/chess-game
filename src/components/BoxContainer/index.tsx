@@ -13,7 +13,7 @@ const BoxContainer: React.FC<LostFiguresProps> = ({ title, figures }) => {
 		<div className={css.lost}>
 			<h3>{title}</h3>
 			{figures.map(figure => (
-				<div key={figure.id}>
+				<div className={css.boxRow} key={figure.id}>
 					{figure.logo && <img width={20} height={20} src={figure.logo} />} {figure.name}
 				</div>
 			))}

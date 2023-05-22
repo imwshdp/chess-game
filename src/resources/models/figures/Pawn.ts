@@ -24,12 +24,21 @@ export default class Pawn extends Figure {
 		const direction = this.cell.figure?.color === Colors.BLACK ? 1 : -1;
 		const firstStepDirection = this.cell.figure?.color === Colors.BLACK ? 2 : -2;
 
-		// if pawn want to move +1 OR ( this is pawn's first step AND pawn wanna move +2 )
-		// AND X coords of cell and target are equal
-		// AND target cell is empty
+		// pawn's step
 		if (
-			(target.y === this.cell.y + direction || (this.isFirstStep && target.y === this.cell.y + firstStepDirection)) &&
+			target.y === this.cell.y + direction &&
 			target.x === this.cell.x &&
+			this.cell.board.getCell(target.x, target.y).isEmpty()
+		) {
+			return true;
+		}
+
+		// pawn's first step
+		if (
+			this.isFirstStep &&
+			target.y === this.cell.y + firstStepDirection &&
+			target.x === this.cell.x &&
+			this.cell.board.getCell(this.cell.x, this.cell.y + direction).isEmpty() &&
 			this.cell.board.getCell(target.x, target.y).isEmpty()
 		) {
 			return true;

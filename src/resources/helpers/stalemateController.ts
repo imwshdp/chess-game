@@ -34,6 +34,7 @@ export const stalemateController = (board: Board, king: Cell): boolean => {
 			// check availability to move for current cell
 			if (checkingCell.figure && checkingCell.figure.color === currentColor) {
 				newPotentialBoard.highlightCells(checkingCell, kingOfPotentialBoard);
+
 				if (isFigureCanMove(newPotentialBoard)) {
 					return false;
 				}

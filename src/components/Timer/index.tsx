@@ -2,9 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from 'store';
 
-import Colors from 'resources/models/Colors';
 import Button from 'components/Button/Button';
-
+import Colors from 'resources/models/Colors';
 import css from './index.module.css';
 
 interface TimerProps {

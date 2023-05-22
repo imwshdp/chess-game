@@ -1,8 +1,7 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
+import { useStore } from 'store';
 
 import css from './index.module.css';
-import { useEffect } from 'react';
-import { useStore } from 'store';
 
 interface TProps {
 	currentPlayerBadge: React.RefObject<HTMLSpanElement> | null;

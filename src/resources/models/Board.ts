@@ -228,11 +228,14 @@ class Board {
 		const leftCell = this.getCell(king.x - 1, king.y);
 		const rightCell = this.getCell(king.x + 1, king.y);
 
+		const whiteKing = this.getCell(0, 4);
+		const blackKing = this.getCell(7, 4);
+
 		const newKingLeftPosition = this.getCell(king.x - 2, king.y);
 		const newKingRightPosition = this.getCell(king.x + 2, king.y);
 
 		// WHITE CASTLES
-		if (king.figure?.color === Colors.WHITE) {
+		if (whiteKing.figure?.name === FigureName.KING && king.figure?.color === Colors.WHITE) {
 			const leftRook = this.getCell(0, 7);
 			const rightRook = this.getCell(7, 7);
 
@@ -258,7 +261,7 @@ class Board {
 			}
 
 			// BLACK CASTLES
-		} else if (king.figure?.color === Colors.BLACK) {
+		} else if (blackKing.figure?.name === FigureName.KING && king.figure?.color === Colors.BLACK) {
 			const leftRook = this.getCell(0, 0);
 			const rightRook = this.getCell(7, 0);
 
