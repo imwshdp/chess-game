@@ -45,7 +45,7 @@ const SettingsForm: React.FC<TProps> = observer(({ restart }) => {
 
 	return (
 		<details>
-			<summary>Настройка таймера</summary>
+			<summary>Настройки</summary>
 			<form className={css.settingsForm} onSubmit={handleSubmit}>
 				<input type='text' name='setTime' placeholder='Время в секундах' />
 
